@@ -1,0 +1,91 @@
+
+{%extends "app/base.html"%}
+
+
+{%block title%}
+RC Stores - Products
+{%endblock%}
+
+{% block content %}
+
+{% if product %}
+  <div style="max-width: 600px; margin: 40px auto; padding: 20px; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;">
+    <img src="{{ product.image.url }}" alt="Shirt Image" width="200" height="200" style="border-radius: 8px; margin-bottom: 20px;">
+    
+    <h2>{{ product.brand }}</h2>
+    <h3 style="color: #555;">{{ product.model_name }}</h3>
+    <p><strong>Price:</strong> ₹<span id="unitPrice">{{ product.price }}</span></p>
+    <p>{{ product.description }}</p>
+
+    <div style="margin-top: 20px;">
+      <button onclick="changeQty(-1)">-</button>
+      <span id="qty">1</span>
+      <button onclick="changeQty(1)">+</button>
+      <span style="margin-left: 10px;">Total: ₹<span id="totalPrice">{{ product.price }}</span></span>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <button onclick="addToCart()">Add to Cart</button>
+      <button onclick="buyNow()">Buy Product</button>
+    </div>
+  </div>
+{% else %}
+  <div style="text-align: center; margin-top: 50px;">
+    <h1>No DETAILS ARE AVAILABLE</h1>
+  </div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 20px;">
+  <a href="{% url 'app:products' %}" style="text-decoration: none; color: #007BFF;">← Back to Products</a>
+</div>
+
+<script>
+  const unitPrice = parseInt(document.getElementById("unitPrice").textContent);
+  const productName = "{{ product.model_name }}";
+  const productId = "{{ product.id }}";
+  const imageUrl = "{{ product.image.url }}";
+
+  function changeQty(delta) {
+    const qtyEl = document.getElementById("qty");
+    let qty = parseInt(qtyEl.textContent) + delta;
+    if (qty < 1) qty = 1;
+    qtyEl.textContent = qty;
+    document.getElementById("totalPrice").textContent = qty * unitPrice;
+  }
+
+  function addToCart() {
+    const qty = parseInt(document.getElementById("qty").textContent);
+    const total = qty * unitPrice;
+
+    const product = {
+      id: productId,
+      name: productName,
+      qty,
+      total,
+      price: unitPrice,
+      image: imageUrl
+    };
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.push(product);
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    alert(productName + " added to cart!");
+    window.location.href = "app/cart.html"; // Or your cart page view
+  }
+
+  function buyNow() {
+    const qty = parseInt(document.getElementById("qty").textContent);
+    const total = qty * unitPrice;
+
+    const params = new URLSearchParams({
+      name: productName,
+      qty,
+      total
+    });
+
+    window.location.href = "app/order.html?" + params.toString();
+  }
+</script>
+
+{% endblock %}

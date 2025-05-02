@@ -1,0 +1,91 @@
+{%extends "app/base.html"%}
+
+
+{%block title%}
+RC Stores - Products
+{%endblock%}
+
+
+{%block content%}
+
+<head>
+  <style>
+    .product-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      width: 30%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .product-card h3 {
+      margin: 10px 0 5px;
+    }
+
+    .product-card p {
+      margin: 5px 0;
+    }
+
+    .product-card a {
+      margin-top: 10px;
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+
+    .product-card a:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="product-row">
+    <h1>Welcome, {{ request.user.username }}</h1>
+    {% for shirt in shirts %}
+    <div class="product-card">
+      <img src="{{ shirt.image.url }}" alt="{{ shirt.model_name }}">
+      <h3>{{ shirt.model_name }}</h3>
+      <p><strong>PRICE:</strong> ₹{{ shirt.price }}</p>
+
+      <a href="{% url 'app:details' shirt.id %}">View Details</a>
+      <button
+        onclick="addToCart('{{ shirt.id }}', '{{ shirt.model_name }}',{{ shirt.price }},'{{ shirt.image.url }}')">Add to
+        Cart</button>
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    function addToCart(id, name, price, image) {
+      const product = { id, name, qty: 1, total: price, price, image };
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(product);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(name + " added to cart!");
+      window.location.href = "/cart.html";  // Optional redirect
+    }
+  </script>
+</body>
+
+{%endblock%}

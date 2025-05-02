@@ -1,0 +1,32 @@
+{% extends "app\base.html" %}
+{% load static %}
+{% block title %}Register{% endblock %}
+
+<!-- {% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <style>
+        .card { width: 350px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+        input { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Register</h2>
+        {% if error %}<p style="color: red;">{{ error }}</p>{% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="file" name="profile_pic" accept="image/*">
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="{% url 'app:login' %}">Login</a></p>
+    </div>
+</body>
+</html>
+
+{% endblock %} -->
