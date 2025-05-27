@@ -1,14 +1,251 @@
-
 {%extends "app/base.html"%}
-
 
 {%block title%}
 RC Stores - cart
 {%endblock%}
 
+{% block content %}
 
-{%block content%}
+<div class="cart-container">
+  <h2 class="cart-title">
+  <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i>
+  Your Shopping Cart
+</h2>
+  
+  <div id="cart-container" class="cart-items-container">
+    <!-- Cart items will be rendered here -->
+  </div>
+  
+  <p class="grand-total" id="grand-total"></p>
+</div>
 
-<h1>Cart Page</h1>
+<!-- Toast Notification -->
+<div id="toast" class="toast-notification"></div>
 
-{%endblock%}
+<style>
+  .cart-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .cart-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+    font-weight: 600;
+  }
+
+  .cart-items-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .cart-item-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .cart-item-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .cart-item-image {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 1rem;
+  }
+
+  .cart-item-body {
+    padding: 1.5rem;
+  }
+
+  .cart-item-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .cart-item-text {
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+
+  .cart-item-total {
+    font-weight: bold;
+    color: #333;
+  }
+
+  .remove-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: background-color 0.3s;
+  }
+
+  .remove-btn:hover {
+    background-color: #c82333;
+  }
+
+  .buy-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: background-color 0.3s;
+  }
+
+  .buy-btn:hover {
+    background-color: #218838;
+  }
+
+  .grand-total {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
+    margin-top: 2rem;
+  }
+
+  .empty-cart-message {
+    text-align: center;
+    grid-column: 1 / -1;
+    color: #666;
+    padding: 2rem;
+  }
+
+  .toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+    z-index: 1050;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s, fadeOut 0.3s 2.2s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+  }
+</style>
+
+<script>
+  // Get cart from localStorage
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const container = document.getElementById("cart-container");
+  const grandTotalDisplay = document.getElementById("grand-total");
+
+  // Update cart count in navbar
+  function updateCartCount() {
+    const cartCountElements = document.querySelectorAll('.cart-count');
+    const totalItems = cart.reduce((total, item) => total + item.qty, 0);
+    
+    cartCountElements.forEach(element => {
+      element.textContent = totalItems;
+      element.style.display = totalItems > 0 ? 'inline-block' : 'none';
+    });
+  }
+
+  // Render cart items
+  function renderCart() {
+    container.innerHTML = '';
+    let grandTotal = 0;
+
+    if (cart.length === 0) {
+      container.innerHTML = `
+        <div class="empty-cart-message">
+          <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+          <h3>Your cart is empty</h3>
+          <p>Start shopping to add items to your cart</p>
+        </div>
+      `;
+      grandTotalDisplay.innerText = '';
+      updateCartCount();
+      return;
+    }
+
+    cart.forEach((item, index) => {
+      grandTotal += item.total;
+
+      const card = document.createElement("div");
+      card.className = "cart-item-card";
+      card.innerHTML = `
+        <img src="${item.image}" class="cart-item-image" alt="${item.name}">
+        <div class="cart-item-body">
+          <h5 class="cart-item-title">${item.name}</h5>
+          <p class="cart-item-text">Price: ₹${item.price}</p>
+          <p class="cart-item-text">Quantity: ${item.qty}</p>
+          <p class="cart-item-text cart-item-total">Total: ₹${item.total}</p>
+          <button class="remove-btn" onclick="removeItem(${index})">
+            <i class="fas fa-trash-alt"></i> Remove
+          </button>
+          <button class="buy-btn" onclick="buyNow('${item.name}', ${item.qty}, ${item.total})">
+            <i class="fas fa-shopping-bag"></i> Buy Now
+          </button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    grandTotalDisplay.innerText = "Grand Total: ₹" + grandTotal;
+    updateCartCount();
+  }
+
+  // Show toast notification
+  function showToast(message, isError = false) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+    toast.style.display = "block";
+    
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 2500);
+  }
+
+  // Remove item from cart
+  function removeItem(index) {
+    const removed = cart[index].name;
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+    showToast(`"${removed}" removed from cart.`, true);
+  }
+
+  // Proceed to checkout
+  function buyNow(name, qty, total) {
+    window.location.href = `/checkout/?name=${encodeURIComponent(name)}&qty=${qty}&total=${total}`;
+  }
+
+  // Initialize cart on page load
+  document.addEventListener('DOMContentLoaded', renderCart);
+</script>
+
+{% endblock %}
