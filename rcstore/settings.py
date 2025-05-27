@@ -71,7 +71,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rcstore.wsgi.application'
-DJANGO_SETTINGS_MODULE=rcstore.settings
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
