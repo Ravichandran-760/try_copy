@@ -26,7 +26,7 @@ import time
 app_name = 'app'
 
 def home(request):
-    return render(request,'app\home.html')
+    return render(request,'app/home.html')
 
 
 
