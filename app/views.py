@@ -161,7 +161,7 @@ def login(request):
             auth_login(request, user)
             return redirect('app:products')
         else:
-            return render(request, 'app\login.html', {'error': 'Invalid credentials'})
+            return render(request, 'app/login.html', {'error': 'Invalid credentials'})
         
     return render(request, 'app/login.html')
 
