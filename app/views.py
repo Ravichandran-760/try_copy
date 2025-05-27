@@ -163,7 +163,7 @@ def login(request):
         else:
             return render(request, 'app\login.html', {'error': 'Invalid credentials'})
         
-    return render(request, 'app\login.html')
+    return render(request, 'app/login.html')
 
 
 
